@@ -116,7 +116,7 @@ cron.schedule("* * * * *", async () => {
       if (eachUser.version) {
         bot.sendMessage(
           eachUser.id,
-          "<b>New update available, update your bot to get latest features by entering /start :)</b>",
+          "<b>New update available(bug fixed), update your bot to get latest features by entering /start :)</b>",
           { parse_mode: "HTML" }
         );
       }
