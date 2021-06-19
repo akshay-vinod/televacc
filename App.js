@@ -57,7 +57,7 @@ async function getSlot(reqDate, chatId, blockData, userAge) {
             .then(() =>
               console.log("message sent to ", chatId, "@", CurrentDate)
             )
-            .catch(() => console.log(""));
+            .catch(() => console.log("User not found/ user blocked the bot"));
           //centerList = centerList + `<b>->${items.name} ${items.date}</b>\n`;
           //console.log("message send");
         }
