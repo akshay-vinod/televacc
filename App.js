@@ -187,8 +187,6 @@ bot.on("message", (msg) => {
       bot.sendMessage(chatId, "You can add multiple block name");
     })();
   } else if (block.includes(msg.text.toString().toLowerCase())) {
-    var temp = ageGroup.splice(0, 3);
-    console.log(temp);
     (async () => {
       await updateData(chatId, msg.text.toString(), false);
       await bot.sendMessage(
@@ -197,7 +195,7 @@ bot.on("message", (msg) => {
       );
       bot.sendMessage(chatId, "Which age group do prefer to get notified?", {
         reply_markup: {
-          keyboard: [temp, ["All age group"], block],
+          keyboard: [ageGroup.splice(0, 3), ["All age group"], block],
         },
       });
     })();
