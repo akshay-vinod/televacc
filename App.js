@@ -195,7 +195,7 @@ bot.on("message", (msg) => {
       );
       bot.sendMessage(chatId, "Which age group do prefer to get notified?", {
         reply_markup: {
-          keyboard: [ageGroup.splice(0, 3), ["All age group"], block],
+          keyboard: [ageGroup, block],
         },
       });
     })();
