@@ -200,11 +200,15 @@ bot.on("message", (msg) => {
       });
     })();
   } else if (ageGroup.includes(msg.text.toString())) {
-    var reqAge =
-      msg.text.toString() === "All age group" ? "0" : msg.text.toString();
     //console.log(reqAge);
     (async () => {
-      await updateData(chatId, reqAge.replace("+", ""), true);
+      await updateData(
+        chatId,
+        msg.text.toString() === "All age group"
+          ? "0"
+          : msg.text.toString().replace("+", ""),
+        true
+      );
       await bot.sendMessage(chatId, `Updated age:${msg.text.toString()}`);
       bot.sendMessage(chatId, "Available slot will be notified :)");
     })();
