@@ -28,7 +28,7 @@ const bot = new TelegramBot(token, { polling: true });
 let slots = [];
 
 //available block to a user
-const block = ["pinarayi", "panoor", "chittariparamba"];
+const block = ["pinarayi", "panoor", "chittariparamba", "azhikode"];
 
 //available age group
 
@@ -51,7 +51,7 @@ async function getSlot(reqDate, chatId, blockData, userAge) {
           (userAge === 0 ? true : items.min_age_limit === userAge)
         ) {
           var CurrentDate = moment().utcOffset("+05:30");
-          var message = `<b>${items.name}</b> \nAge:${items.min_age_limit} -> ${items.date}\n ${items.vaccine}  ▶${items.available_capacity} \nhttps://selfregistration.cowin.gov.in/`;
+          var message = `<b>${items.name}</b> \nAge:${items.min_age_limit}+ -> ${items.date}\n${items.pincode}\n${items.address}\n ${items.vaccine}  ▶${items.available_capacity} \nhttps://selfregistration.cowin.gov.in/`;
           bot
             .sendMessage(chatId, message, { parse_mode: "HTML" })
             .then(() =>
@@ -116,7 +116,7 @@ cron.schedule("* * * * *", async () => {
       if (eachUser.version) {
         bot.sendMessage(
           eachUser.id,
-          "<b>New update available(bug fixed), update your bot to get latest features by entering /start :)</b>",
+          "<b>New update available(block list updated), update your bot to get latest features by entering /start :)</b>",
           { parse_mode: "HTML" }
         );
       }
@@ -183,7 +183,7 @@ bot.on("message", (msg) => {
           keyboard: [block],
         },
       });
-      await bot.sendDocument(chatId, "Block_List.pdf");
+      await bot.sendDocument(chatId, "Block List.pdf");
       bot.sendMessage(chatId, "You can add multiple block name");
     })();
   } else if (block.includes(msg.text.toString().toLowerCase())) {
