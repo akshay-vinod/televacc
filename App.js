@@ -51,7 +51,7 @@ async function getSlot(reqDate, chatId, blockData, userAge) {
           (userAge === 0 ? true : items.min_age_limit === userAge)
         ) {
           var CurrentDate = moment().utcOffset("+05:30");
-          var message = `<b>${items.name}</b> \nAge:${items.min_age_limit}+ -> ${items.date}\n${items.pincode}\n${items.address}\n ${items.vaccine}  ▶${items.available_capacity} \nhttps://selfregistration.cowin.gov.in/`;
+          var message = `<b>${items.name}</b> \nAge:${items.min_age_limit}+ -> ${items.date}\n${items.pincode}\n${items.address}\n${items.vaccine}  ▶${items.available_capacity}\nD1▶${items.available_capacity_dose1}\nD2▶${items.available_capacity_dose2} \nhttps://selfregistration.cowin.gov.in/`;
           bot
             .sendMessage(chatId, message, { parse_mode: "HTML" })
             .then(() =>
