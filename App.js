@@ -28,7 +28,7 @@ const bot = new TelegramBot(token, { polling: true });
 let slots = [];
 
 //available block to a user
-const block = ["pinarayi", "panoor", "chittariparamba", "azhikode"];
+const block = ["pinarayi", "panoor", "chittariparamba", "azhikode", "iriveri"];
 
 //available age group
 
