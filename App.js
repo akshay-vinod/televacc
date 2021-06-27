@@ -29,6 +29,8 @@ let slots = [];
 
 //available block to a user
 const block = ["pinarayi", "panoor", "chittariparamba", "azhikode", "iriveri"];
+const block1 = ["pinarayi", "panoor", "chittariparamba"];
+const block2 = ["azhikode", "iriveri"];
 
 //available age group
 
@@ -180,10 +182,10 @@ bot.on("message", (msg) => {
     (async () => {
       await bot.sendMessage(chatId, resp, {
         reply_markup: {
-          keyboard: [block],
+          keyboard: [block1, block2],
         },
       });
-      await bot.sendDocument(chatId, "Block List.pdf");
+      await bot.sendDocument(chatId, "Block_List.pdf");
       bot.sendMessage(chatId, "You can add multiple block name");
     })();
   } else if (block.includes(msg.text.toString().toLowerCase())) {
@@ -195,7 +197,7 @@ bot.on("message", (msg) => {
       );
       bot.sendMessage(chatId, "Which age group do prefer to get notified?", {
         reply_markup: {
-          keyboard: [ageGroup, block],
+          keyboard: [ageGroup, block1, block2],
         },
       });
     })();
