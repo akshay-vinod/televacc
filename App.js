@@ -188,6 +188,12 @@ bot.on("message", (msg) => {
       await bot.sendDocument(chatId, "Block_List.pdf");
       bot.sendMessage(chatId, "You can add multiple block name");
     })();
+  } else if (msg.text.toString().toLowerCase() === "⬅blocks") {
+    bot.sendMessage(chatId, "Blocks are listed bellow", {
+      reply_markup: {
+        keyboard: [block1, block2],
+      },
+    });
   } else if (block.includes(msg.text.toString().toLowerCase())) {
     (async () => {
       await updateData(chatId, msg.text.toString(), false);
@@ -197,7 +203,7 @@ bot.on("message", (msg) => {
       );
       bot.sendMessage(chatId, "Which age group do prefer to get notified?", {
         reply_markup: {
-          keyboard: [ageGroup, block1, block2],
+          keyboard: [ageGroup, ["⬅Blocks"]],
         },
       });
     })();
@@ -220,6 +226,6 @@ bot.on("message", (msg) => {
       "Invalid Block Name\n<b>Available Block are mentioned in bellow pdf</b>",
       { parse_mode: "HTML" }
     );
-    bot.sendDocument(chatId, "Block List.pdf");
+    bot.sendDocument(chatId, "Block_List.pdf");
   }
 });
