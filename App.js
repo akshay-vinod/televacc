@@ -53,7 +53,7 @@ async function getSlot(reqDate, chatId, blockData, userAge) {
           (userAge === 0 ? true : items.min_age_limit === userAge)
         ) {
           var CurrentDate = moment().utcOffset("+05:30");
-          var message = `<b>${items.name}</b> \nAge:${items.min_age_limit}+ -> ${items.date}\n${items.pincode}\n${items.address}\n${items.vaccine}  ▶${items.available_capacity}\nD1▶${items.available_capacity_dose1}\nD2▶${items.available_capacity_dose2} \nhttps://selfregistration.cowin.gov.in/`;
+          var message = `<b>${items.name}</b> \nAge:${items.min_age_limit}+ -> ${items.date}\n${items.pincode}\n${items.address}\n${items.vaccine}  ▶${items.available_capacity} (${items.fee_type})\nDose 1▶${items.available_capacity_dose1}\nDose 2▶${items.available_capacity_dose2} \nhttps://selfregistration.cowin.gov.in/`;
           bot
             .sendMessage(chatId, message, { parse_mode: "HTML" })
             .then(() =>
@@ -118,7 +118,7 @@ cron.schedule("* * * * *", async () => {
       if (eachUser.version) {
         bot.sendMessage(
           eachUser.id,
-          "<b>New update available(block list updated), update your bot to get latest features by entering /start :)</b>",
+          "<b>New update available(You can now unsubscribe notification and subscribe any time), update your bot to get latest features by entering /start :)</b>",
           { parse_mode: "HTML" }
         );
       }
@@ -126,12 +126,31 @@ cron.schedule("* * * * *", async () => {
   });
 });
 //Block name to original format
-const updateData = (chatId, str, age) => {
+const updateData = (
+  chatId,
+  str,
+  age,
+  unsubscribe = false,
+  subscribe = false
+) => {
   const options = {
     new: true,
     upsert: true,
   };
-  if (!age) {
+  if (unsubscribe) {
+    User.findOneAndUpdate(
+      { id: chatId },
+      { notify: subscribe },
+      options,
+      (err, user) => {
+        if (err || !user) {
+          console.log("DB error while creating user");
+        } else {
+          console.log(user);
+        }
+      }
+    );
+  } else if (!age) {
     var splitStr = str.toLowerCase().split(" ");
     for (var i = 0; i < splitStr.length; i++) {
       // You do not need to check if i is larger than splitStr length, as your for does that for you
@@ -203,7 +222,7 @@ bot.on("message", (msg) => {
       );
       bot.sendMessage(chatId, "Which age group do prefer to get notified?", {
         reply_markup: {
-          keyboard: [ageGroup, ["⬅Blocks"]],
+          keyboard: [ageGroup, ["⬅Blocks"], ["Unsubscribe"]],
         },
       });
     })();
@@ -220,12 +239,25 @@ bot.on("message", (msg) => {
       await bot.sendMessage(chatId, `Updated age:${msg.text.toString()}`);
       bot.sendMessage(chatId, "Available slot will be notified :)");
     })();
+  } else if (msg.text.toString().toLowerCase() === "unsubscribe") {
+    (async () => {
+      await updateData(chatId, undefined, undefined, true);
+      bot.sendMessage(chatId, "Unsubscribed :)", {
+        reply_markup: {
+          keyboard: [["Subscribe"]],
+        },
+      });
+    })();
+  } else if (msg.text.toString().toLowerCase() === "subscribe") {
+    (async () => {
+      await updateData(chatId, undefined, undefined, true, true);
+      bot.sendMessage(chatId, "Subscribed :)", {
+        reply_markup: {
+          keyboard: [ageGroup, ["⬅Blocks"], ["Unsubscribe"]],
+        },
+      });
+    })();
   } else {
-    bot.sendMessage(
-      chatId,
-      "Invalid Block Name\n<b>Available Block are mentioned in bellow pdf</b>",
-      { parse_mode: "HTML" }
-    );
-    bot.sendDocument(chatId, "Block_List.pdf");
+    bot.sendMessage(chatId, "Invalid Command\n");
   }
 });
