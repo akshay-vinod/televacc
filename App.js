@@ -50,7 +50,8 @@ async function getSlot(reqDate, chatId, blockData, userAge) {
         if (
           userBlocks.includes(items.block_name) &&
           items.available_capacity !== 0 &&
-          (userAge === 0 ? true : items.min_age_limit === userAge)
+          (userAge === 0 ? true : items.min_age_limit === userAge) &&
+          items.fee_type === "Free"
         ) {
           var CurrentDate = moment().utcOffset("+05:30");
           var message = `<b>${items.name}</b> \nAge:${items.min_age_limit}+ -> ${items.date}\n${items.pincode}\n${items.address}\n${items.vaccine}  ▶${items.available_capacity} (${items.fee_type})\nDose 1▶${items.available_capacity_dose1}\nDose 2▶${items.available_capacity_dose2} \nhttps://selfregistration.cowin.gov.in/`;
@@ -118,7 +119,7 @@ cron.schedule("* * * * *", async () => {
       if (eachUser.version) {
         bot.sendMessage(
           eachUser.id,
-          "<b>New update available(You can now unsubscribe notification and subscribe any time), update your bot to get latest features by entering /start :)</b>",
+          "<b>Bot Updated - now paid slot will not be notified as per user request</b>",
           { parse_mode: "HTML" }
         );
       }
