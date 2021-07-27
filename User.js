@@ -28,6 +28,14 @@ var userSchema = new mongoose.Schema(
       type: [],
       required: true,
     },
+    dose: {
+      type: Number,
+      default: 0,
+    },
+    pay: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );

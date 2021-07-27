@@ -36,7 +36,7 @@ const block2 = ["azhikode", "iriveri"];
 
 const ageGroup = ["18+", "40+", "45+", "All age group"];
 
-async function getSlot(reqDate, chatId, blockData, userAge) {
+async function getSlot(reqDate, chatId, blockData, userAge, userDose, userFee) {
   try {
     // handle success
     const response = await axios.get(
@@ -51,7 +51,16 @@ async function getSlot(reqDate, chatId, blockData, userAge) {
           userBlocks.includes(items.block_name) &&
           items.available_capacity !== 0 &&
           (userAge === 0 ? true : items.min_age_limit === userAge) &&
-          items.fee_type === "Free"
+          (userDose === 0
+            ? true
+            : userDose === 1
+            ? items.available_capacity_dose1 > 0
+            : items.available_capacity_dose2 > 0) &&
+          (userFee === 0
+            ? true
+            : userFee === 1
+            ? items.fee_type === "Free"
+            : items.fee_type === "Paid")
         ) {
           var CurrentDate = moment().utcOffset("+05:30");
           var message = `<b>${items.name}</b> \nAge:${items.min_age_limit}+ -> ${items.date}\n${items.pincode}\n${items.address}\n${items.vaccine}  ▶${items.available_capacity} (${items.fee_type})\nDose 1▶${items.available_capacity_dose1}\nDose 2▶${items.available_capacity_dose2} \nhttps://selfregistration.cowin.gov.in/`;
@@ -102,15 +111,26 @@ cron.schedule("* * * * *", async () => {
         dateTomorrow,
         eachUser.id,
         eachUser.blockData,
-        eachUser.age
+        eachUser.age,
+        eachUser.dose,
+        eachUser.pay
       );
       await getSlot(
         dateDATomorrow,
         eachUser.id,
         eachUser.blockData,
-        eachUser.age
+        eachUser.age,
+        eachUser.dose,
+        eachUser.pay
       );
-      await getSlot(dateDATT, eachUser.id, eachUser.blockData, eachUser.age);
+      await getSlot(
+        dateDATT,
+        eachUser.id,
+        eachUser.blockData,
+        eachUser.age,
+        eachUser.dose,
+        eachUser.pay
+      );
       // if (centerList.length > 0) {
       //   bot.sendMessage(eachUser.id, centerList, { parse_mode: "HTML" });
       //   var CurrentDate = moment();
@@ -119,7 +139,7 @@ cron.schedule("* * * * *", async () => {
       if (eachUser.version) {
         bot.sendMessage(
           eachUser.id,
-          "<b>Bot Updated - now paid slot will not be notified as per user request</b>",
+          "<b>Bot Updated - now paid you can choose fee/paid and dose1/dose2</b>",
           { parse_mode: "HTML" }
         );
       }
@@ -132,7 +152,9 @@ const updateData = (
   str,
   age,
   unsubscribe = false,
-  subscribe = false
+  subscribe = false,
+  dose = false,
+  pay = false
 ) => {
   const options = {
     new: true,
@@ -142,6 +164,38 @@ const updateData = (
     User.findOneAndUpdate(
       { id: chatId },
       { notify: subscribe },
+      options,
+      (err, user) => {
+        if (err || !user) {
+          console.log("DB error while creating user");
+        } else {
+          console.log(user);
+        }
+      }
+    );
+  } else if (dose && age) {
+    userDose = 0;
+    if (str === "dose 1") userDose = 1;
+    else if (str === "dose 2") userDose = 2;
+    User.findOneAndUpdate(
+      { id: chatId },
+      { dose: userDose },
+      options,
+      (err, user) => {
+        if (err || !user) {
+          console.log("DB error while creating user");
+        } else {
+          console.log(user);
+        }
+      }
+    );
+  } else if (pay && age) {
+    userFee = 0;
+    if (str === "free") userFee = 1;
+    else if (str === "paid") userFee = 2;
+    User.findOneAndUpdate(
+      { id: chatId },
+      { pay: userFee },
       options,
       (err, user) => {
         if (err || !user) {
@@ -214,6 +268,12 @@ bot.on("message", (msg) => {
         keyboard: [block1, block2],
       },
     });
+  } else if (msg.text.toString().toLowerCase() === "⬅age group") {
+    bot.sendMessage(chatId, "Age groups are listed bellow", {
+      reply_markup: {
+        keyboard: [ageGroup, ["⬅Blocks"], ["Unsubscribe"]],
+      },
+    });
   } else if (block.includes(msg.text.toString().toLowerCase())) {
     (async () => {
       await updateData(chatId, msg.text.toString(), false);
@@ -239,6 +299,51 @@ bot.on("message", (msg) => {
       );
       await bot.sendMessage(chatId, `Updated age:${msg.text.toString()}`);
       bot.sendMessage(chatId, "Available slot will be notified :)");
+      bot.sendMessage(chatId, "You can customize free/paid and dosage", {
+        reply_markup: {
+          keyboard: [
+            ["Dose 1", "Dose 2", "D1 & D2"],
+            ["free", "paid", "free & paid"],
+            ["⬅Age Group"],
+            ["Unsubscribe"],
+          ],
+        },
+      });
+    })();
+  } else if (
+    msg.text.toString().toLowerCase() === "dose 1" ||
+    msg.text.toString().toLowerCase() === "dose 2" ||
+    msg.text.toString().toLowerCase() === "d1 & d2"
+  ) {
+    (async () => {
+      await updateData(
+        chatId,
+        msg.text.toString().toLowerCase(),
+        true,
+        false,
+        false,
+        true,
+        false
+      );
+      bot.sendMessage(chatId, "Dose selected.");
+      bot.sendMessage(chatId, "Select your fee type");
+    })();
+  } else if (
+    msg.text.toString().toLowerCase() === "free" ||
+    msg.text.toString().toLowerCase() === "paid" ||
+    msg.text.toString().toLowerCase() === "free & paid"
+  ) {
+    (async () => {
+      await updateData(
+        chatId,
+        msg.text.toString().toLowerCase(),
+        true,
+        false,
+        false,
+        false,
+        true
+      );
+      bot.sendMessage(chatId, "Fee Type selected.");
     })();
   } else if (msg.text.toString().toLowerCase() === "unsubscribe") {
     (async () => {
