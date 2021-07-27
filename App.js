@@ -139,7 +139,7 @@ cron.schedule("* * * * *", async () => {
       if (eachUser.version) {
         bot.sendMessage(
           eachUser.id,
-          "<b>Bot Updated - now paid you can choose fee/paid and dose1/dose2</b>",
+          "<b>Bot Updated - now you can choose fee/paid and dose1/dose2. Restart the bot by entering /start</b>",
           { parse_mode: "HTML" }
         );
       }
