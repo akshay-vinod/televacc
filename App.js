@@ -37,6 +37,7 @@ const block2 = ["azhikode", "iriveri"];
 const ageGroup = ["18+", "40+", "45+", "All age group"];
 
 async function getSlot(reqDate, chatId, blockData, userAge, userDose, userFee) {
+  // console.log(chatId, userDose, userFee);
   try {
     // handle success
     const response = await axios.get(
@@ -47,20 +48,23 @@ async function getSlot(reqDate, chatId, blockData, userAge, userDose, userFee) {
       var userBlocks = blockData;
       //console.log(userBlocks);
       slots.map((items) => {
+        dose = false;
+        pay = false;
+        if (userDose === 0) dose = true;
+        else if (userDose === 1 && items.available_capacity_dose1 > 0)
+          dose = true;
+        else if (userDose === 2 && items.available_capacity_dose2 > 0)
+          dose = true;
+        if (userFee === 0) pay = true;
+        else if (userFee === 1 && items.fee_type === "Free") pay = true;
+        else if (userFee === 2 && items.fee_type === "Paid") pay = true;
+        // console.log(chatId, dose, pay);
         if (
           userBlocks.includes(items.block_name) &&
           items.available_capacity !== 0 &&
           (userAge === 0 ? true : items.min_age_limit === userAge) &&
-          (userDose === 0
-            ? true
-            : userDose === 1
-            ? items.available_capacity_dose1 > 0
-            : items.available_capacity_dose2 > 0) &&
-          (userFee === 0
-            ? true
-            : userFee === 1
-            ? items.fee_type === "Free"
-            : items.fee_type === "Paid")
+          dose &&
+          pay
         ) {
           var CurrentDate = moment().utcOffset("+05:30");
           var message = `<b>${items.name}</b> \nAge:${items.min_age_limit}+ -> ${items.date}\n${items.pincode}\n${items.address}\n${items.vaccine}  ▶${items.available_capacity} (${items.fee_type})\nDose 1▶${items.available_capacity_dose1}\nDose 2▶${items.available_capacity_dose2} \nhttps://selfregistration.cowin.gov.in/`;
@@ -106,7 +110,14 @@ cron.schedule("* * * * *", async () => {
       );
     } else {
       //centerList = "";
-      await getSlot(date, eachUser.id, eachUser.blockData, eachUser.age);
+      await getSlot(
+        date,
+        eachUser.id,
+        eachUser.blockData,
+        eachUser.age,
+        eachUser.dose,
+        eachUser.pay
+      );
       await getSlot(
         dateTomorrow,
         eachUser.id,
@@ -139,7 +150,7 @@ cron.schedule("* * * * *", async () => {
       if (eachUser.version) {
         bot.sendMessage(
           eachUser.id,
-          "<b>Bot Updated - now you can choose fee/paid and dose1/dose2. Restart the bot by entering /start</b>",
+          "<b>bud fixed - sorry for the inconvenience caused :). Restart the bot by entering /start</b>",
           { parse_mode: "HTML" }
         );
       }
@@ -298,8 +309,8 @@ bot.on("message", (msg) => {
         true
       );
       await bot.sendMessage(chatId, `Updated age:${msg.text.toString()}`);
-      bot.sendMessage(chatId, "Available slot will be notified :)");
-      bot.sendMessage(chatId, "You can customize free/paid and dosage", {
+      await bot.sendMessage(chatId, "Available slot will be notified :)");
+      bot.sendMessage(chatId, "You can customize fee type and dosage", {
         reply_markup: {
           keyboard: [
             ["Dose 1", "Dose 2", "D1 & D2"],
@@ -325,7 +336,7 @@ bot.on("message", (msg) => {
         true,
         false
       );
-      bot.sendMessage(chatId, "Dose selected.");
+      await bot.sendMessage(chatId, "Dose selected.");
       bot.sendMessage(chatId, "Select your fee type");
     })();
   } else if (
@@ -343,7 +354,8 @@ bot.on("message", (msg) => {
         false,
         true
       );
-      bot.sendMessage(chatId, "Fee Type selected.");
+      await bot.sendMessage(chatId, "Fee Type selected.");
+      bot.sendMessage(chatId, "Available slot will be notified :)");
     })();
   } else if (msg.text.toString().toLowerCase() === "unsubscribe") {
     (async () => {
