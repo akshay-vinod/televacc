@@ -34,7 +34,7 @@ const block2 = ["azhikode", "iriveri"];
 
 //available age group
 
-const ageGroup = ["18+", "40+", "45+", "All age group"];
+const ageGroup = ["15+", "18+", "40+", "45+", "All age group"];
 
 async function getSlot(reqDate, chatId, blockData, userAge, userDose, userFee) {
   // console.log(chatId, userDose, userFee);
@@ -150,7 +150,7 @@ cron.schedule("* * * * *", async () => {
       if (eachUser.version) {
         bot.sendMessage(
           eachUser.id,
-          "<b>bud fixed - sorry for the inconvenience caused :). Restart the bot by entering /start</b>",
+          "<b>15+ age group added enter /age to update your age group</b>",
           { parse_mode: "HTML" }
         );
       }
@@ -279,7 +279,10 @@ bot.on("message", (msg) => {
         keyboard: [block1, block2],
       },
     });
-  } else if (msg.text.toString().toLowerCase() === "⬅age group") {
+  } else if (
+    msg.text.toString().toLowerCase() === "⬅age group" ||
+    "/age".includes(msg.text.toString().toLowerCase())
+  ) {
     bot.sendMessage(chatId, "Age groups are listed bellow", {
       reply_markup: {
         keyboard: [ageGroup, ["⬅Blocks"], ["Unsubscribe"]],
