@@ -105,7 +105,7 @@ cron.schedule("* * * * *", async () => {
     if (eachUser.serverDown) {
       bot.sendMessage(
         eachUser.id,
-        "<b>Server under maintenance, will be back within few minutes :)</b>",
+        "<b>We are stopping our service hope you are all vaccinated :)</b>",
         { parse_mode: "HTML" }
       );
     } else {
